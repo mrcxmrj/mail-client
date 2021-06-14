@@ -1,11 +1,17 @@
 from tkinter import *
+from tkinter import font
+import tkinter.ttk as ttk
 import tkinter.filedialog as fd
+from tk_html_widgets import HTMLText
 from PIL import Image, ImageTk
 
-
 class ClientWindow:
-    def __init__(self, email_address):
+    def __init__(self, name, email_address, imap_server, smtp_server):
+        self.name = name
         self.email_address = email_address
+        self.imap_server = imap_server
+        self.smtp_server = smtp_server
+
         self.frame = Tk()
         self.frame.attributes('-zoomed', True)
         self.frame.resizable(0, 0)
@@ -39,8 +45,14 @@ class ClientWindow:
         # attach
         self.attach_label = Label(self.frame, text="Attach:")
         self.attach_button = Button(self.frame, text="Add", width=20, command=lambda: self.attach())
+        # font
+        self.font_value = StringVar()
+        self.font_combobox = ttk.Combobox(self.frame, textvariable=self.font_value, state="readonly")
+        self.font_combobox['values'] = font.families()
+        self.font_combobox.current(0)
+        self.font_combobox.bind("<<ComboboxSelected>>", lambda event: self.font())
         # text
-        self.text = Text(self.frame, bd=2)
+        self.text = HTMLText()
 
         # inbox
         self.inbox_button = Button(self.frame, text="Inbox", width=20, command=lambda: self.inbox())
@@ -63,7 +75,8 @@ class ClientWindow:
             self.topic_entry.place(x=300, y=140, width=self.width - 400)
             self.attach_label.place(x=250, y=170)
             self.attach_button.place(x=300, y=170, height=20)
-            self.text.place(x=250, y=200, width=self.width - 350, height=self.height - 300)
+            self.font_combobox.place(x=250, y=200, width=150)
+            self.text.place(x=250, y=230, width=self.width - 350, height=self.height - 300)
         else:
             self.send_button.place_forget()
             self.save_button.place_forget()
@@ -76,6 +89,7 @@ class ClientWindow:
             self.topic_entry.place_forget()
             self.attach_label.place_forget()
             self.attach_button.place_forget()
+            self.font_combobox.place_forget()
             self.text.place_forget()
     
     def write(self):
@@ -92,6 +106,10 @@ class ClientWindow:
 
     def attach(self):
         path = fd.askopenfile(mode="r")
+
+    def font(self):
+        print(self.text.selection_get())
+        print(self.font_value.get())
 
     def inbox(self):
         self.set_write_widgets_visibiltiy(False)
